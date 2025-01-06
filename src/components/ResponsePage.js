@@ -31,7 +31,7 @@ function ResponsePage() {
 
             let attempts = 0;
             const maxAttempts = 5;
-            const retryDelay = 2000; // Start with a 2-second delay
+            const retryDelay = 2000; // Initial retry delay
 
             while (attempts < maxAttempts) {
                 try {
@@ -39,38 +39,54 @@ function ResponsePage() {
                         process.env.REACT_APP_API_URL,
                         {
                             model: "gpt-3.5-turbo",
-                            messages: [{ role: "user", content: `What is the improvement level for someone wanting to improve their ${skill}?` }],
+                            messages: [
+                                {
+                                    role: "user",
+                                    content: `What is the improvement level for someone wanting to improve their ${skill}?`,
+                                },
+                            ],
                         },
                         {
                             headers: {
                                 Authorization: `Bearer ${process.env.REACT_APP_API_KEY}`,
-                                'Content-Type': 'application/json',
+                                "Content-Type": "application/json",
                             },
                         }
                     );
 
-                    // Process the response
+                    // Extract the response content
                     const result = chatGptResponse.data.choices[0].message.content;
-                    setResponse(result);
+                    skillCache[skill] = result; // Cache the response
+
+                    // Split the response into different levels of advice
+                    const splitResult = result.split('\n'); // Adjust based on actual response format
+                    setResponse(splitResult[0] || 'No general advice available.'); // General advice
+                    setBeginnerInfo(splitResult[1] || 'No beginner tips available.'); // Beginner tips
+                    setIntermediateInfo(splitResult[2] || 'No intermediate tips available.'); // Intermediate tips
+
+                    setLoading(false); // Stop loading
                     return; // Exit if successful
                 } catch (error) {
                     if (error.response && error.response.status === 429) {
                         const waitTime = retryDelay * 2 ** attempts; // Exponential backoff
                         console.warn(`Rate limit exceeded. Retrying in ${waitTime}ms...`);
-                        await new Promise((resolve) => setTimeout(resolve, waitTime));
+                        await new Promise((resolve) => setTimeout(resolve, waitTime)); // Wait before retrying
                         attempts++; // Increment the attempt count
                     } else {
-                        console.error('Error fetching response:', error);
-                        setResponse('Error fetching response from the API.');
+                        console.error("Error fetching response:", error);
+                        setResponse("Error fetching response from the API."); // Set error message
+                        setLoading(false); // Stop loading even if there's an error
                         return; // Exit on other errors
                     }
                 }
             }
 
-            setResponse('Exceeded maximum retries. Please try again later.'); // Final message after max attempts
+            // If maximum attempts are exceeded
+            setResponse("Exceeded maximum retries. Please try again later.");
+            setLoading(false); // Stop loading after retries
         };
 
-        fetchResponse();
+        fetchResponse(); // Call the fetch function
     }, [skill]);
 
     return (
