@@ -31,7 +31,7 @@ function ResponsePage() {
 
             let attempts = 0;
             const maxAttempts = 5;
-            const retryDelay = 5000; // Start with a 5-second delay
+            const retryDelay = 2000; // Start with a 2-second delay
 
             while (attempts < maxAttempts) {
                 try {
@@ -49,17 +49,10 @@ function ResponsePage() {
                         }
                     );
 
+                    // Process the response
                     const result = chatGptResponse.data.choices[0].message.content;
-                    skillCache[skill] = result; // Cache the response
-
-                    // Split the response into different levels of advice
-                    const splitResult = result.split('\n'); // Example split, adjust based on actual response format
-                    setResponse(splitResult[0] || 'No general advice available.');
-                    setBeginnerInfo(splitResult[1] || 'No beginner tips available.');
-                    setIntermediateInfo(splitResult[2] || 'No intermediate tips available.');
-
-                    setLoading(false); // Data has been fetched, set loading to false
-                    return; // Exit the function if successful
+                    setResponse(result);
+                    return; // Exit if successful
                 } catch (error) {
                     if (error.response && error.response.status === 429) {
                         const waitTime = retryDelay * 2 ** attempts; // Exponential backoff
@@ -69,14 +62,12 @@ function ResponsePage() {
                     } else {
                         console.error('Error fetching response:', error);
                         setResponse('Error fetching response from the API.');
-                        setLoading(false);
-                        return; // Exit the function on other errors
+                        return; // Exit on other errors
                     }
                 }
             }
 
             setResponse('Exceeded maximum retries. Please try again later.'); // Final message after max attempts
-            setLoading(false);
         };
 
         fetchResponse();
