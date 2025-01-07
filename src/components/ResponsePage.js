@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './ResponsePage.css'; // Import your CSS file
 
 function ResponsePage() {
     const location = useLocation();

@@ -1,21 +1,40 @@
-.button-container {
+body {
+    background-color: #1C1C1C; /* Carbon black background */
+    font-family: 'Oswald', sans-serif; /* Use the Oswald font */
+    color: #ffffff; /* White text for contrast */
+    margin: 0;
+    padding: 0;
+}
+
+.response-page {
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+    background-color: rgba(0, 0, 0, 0.8); /* Slightly transparent background for the content */
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.title {
+    text-align: center;
+    font-size: 2.5em; /* Larger font size for the title */
+}
+
+h2 {
     margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    gap: 10px; /* Space between buttons */
+    font-size: 1.8em; /* Slightly larger font size for subheadings */
 }
 
-.button-container button {
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
+button {
+    background-color: #4CAF50; /* Green background for the button */
+    color: white; /* White text */
+    padding: 10px 20px;
     border: none;
-    background-color: #007BFF; /* Bootstrap primary color */
-    color: white;
     border-radius: 5px;
-    transition: background-color 0.3s;
+    cursor: pointer;
+    font-size: 1em;
 }
 
-.button-container button:hover {
-    background-color: #0056b3; /* Darker shade on hover */
+button:hover {
+    background-color: #45a049; /* Darker green on hover */
 }
