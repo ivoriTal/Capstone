@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
-import Auth from './Auth';
 
 function HomePage() {
     const [skill, setSkill] = useState('');
     const navigate = useNavigate();
-    const [token, setToken] = useState(null);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         navigate('/response', { state: { skill } }); 
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/');
     };
 
     return (
@@ -18,6 +21,7 @@ function HomePage() {
             <header className="homepage-header">
                 <h1>Welcome to Basketball Training</h1>
                 <p>Your mission is to improve your skills and reach your full potential.</p>
+                <button onClick={handleLogout} className="logout-button">Logout</button>
             </header>
             <div className="hero-image">
                 <img src="hero-image.jpg" alt="Basketball Training" />
@@ -41,11 +45,6 @@ function HomePage() {
                     "You miss 100% of the shots you don't take." - Wayne Gretzky
                 </blockquote>
             </div>
-            {!token ? (
-                <Auth setToken={setToken} />
-            ) : (
-                <p>You are logged in!</p>
-            )}
         </div>
     );
 }

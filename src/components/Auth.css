@@ -6,6 +6,7 @@
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     color: #000000; 
+    text-align: center;
 }
 
 .auth-form {
@@ -52,8 +53,57 @@
     background-color: rgba(184, 134, 11, 0.1); 
 }
 
+.google-signin-button {
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.skill-level-form {
+    margin-top: 20px;
+}
+
+.skill-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 20px 0;
+    text-align: left;
+    padding: 0 20px;
+}
+
+.skill-options label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+.skill-options input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.submit-button {
+    background-color: #4285f4;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+    background-color: #3367d6;
+}
+
 .auth-container h2 {
     color: #000000;
-    text-align: center;
     margin-bottom: 1.5rem;
+    font-size: 1.5rem;
 } 

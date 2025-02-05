@@ -4,10 +4,13 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
+const { OAuth2Client } = require('google-auth-library');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
+const googleClient = new OAuth2Client("353441536259-qov1gkv1voco092rst9vhda68cqemk5l.apps.googleusercontent.com");
 
 app.use(cors({
     origin: 'http://localhost:3000',
@@ -90,6 +93,104 @@ app.post('/api/login', async (req, res) => {
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'Error during login' });
+    }
+});
+
+app.post('/api/google-auth', async (req, res) => {
+    try {
+        const { credential } = req.body;
+        console.log('Received credential request');
+        
+        if (!credential) {
+            console.error('No credential provided');
+            return res.status(400).json({ message: 'No credential provided' });
+        }
+
+        // Verify the Google token
+        console.log('Verifying token...');
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: "353441536259-qov1gkv1voco092rst9vhda68cqemk5l.apps.googleusercontent.com"
+        });
+        
+        console.log('Token verified successfully');
+        const payload = ticket.getPayload();
+        const { email, sub: googleId } = payload;
+
+        // Check if user exists
+        let result = await pool.query('SELECT * FROM users WHERE google_id = $1', [googleId]);
+        
+        if (result.rows.length === 0) {
+            console.log('Creating new user...');
+            // Create new user if doesn't exist
+            result = await pool.query(
+                'INSERT INTO users (email, google_id) VALUES ($1, $2) RETURNING id',
+                [email, googleId]
+            );
+            console.log('New user created');
+        } else {
+            console.log('Existing user found');
+        }
+
+        const userId = result.rows[0].id;
+        const token = jwt.sign(
+            { userId: userId },
+            'your_jwt_secret',
+            { expiresIn: '1h' }
+        );
+
+        console.log('Authentication successful');
+        res.json({ 
+            token, 
+            userId,
+            message: 'Google authentication successful' 
+        });
+    } catch (error) {
+        console.error('Google auth error:', error);
+        res.status(500).json({ 
+            message: 'Error during Google authentication',
+            error: error.message 
+        });
+    }
+});
+
+// Add this endpoint to handle skill level updates
+app.post('/api/update-skill-level', async (req, res) => {
+    try {
+        const { skillLevel, userId } = req.body;
+        
+        if (!skillLevel || !userId) {
+            return res.status(400).json({ message: 'Skill level and user ID are required' });
+        }
+
+        // Update the user's skill level
+        const result = await pool.query(
+            'UPDATE users SET skill_level = $1 WHERE id = $2 RETURNING *',
+            [skillLevel, userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Create new token with skill level
+        const token = jwt.sign(
+            { 
+                userId: userId,
+                skillLevel: skillLevel
+            },
+            'your_jwt_secret',
+            { expiresIn: '1h' }
+        );
+
+        res.json({ 
+            token,
+            message: 'Skill level updated successfully',
+            skillLevel 
+        });
+    } catch (error) {
+        console.error('Error updating skill level:', error);
+        res.status(500).json({ message: 'Error updating skill level' });
     }
 });
 

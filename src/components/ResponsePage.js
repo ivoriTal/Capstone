@@ -1,110 +1,98 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './ResponsePage.css'; 
+import './ResponsePage.css';
 
 function ResponsePage() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { skill } = location.state || {}; 
+    const { skill } = location.state || {};
     const [response, setResponse] = useState('');
-    const [beginnerInfo, setBeginnerInfo] = useState('');
-    const [intermediateInfo, setIntermediateInfo] = useState('');
-    const [loading, setLoading] = useState(true); 
-
-    const skillCache = {}; 
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (!skill) {
-            setResponse('No skill provided!');
+            setError('No skill provided!');
             setLoading(false);
             return;
         }
 
         const fetchResponse = async () => {
-            
-            if (skillCache[skill]) {
-                console.log('Returning cached response for skill:', skill);
-                setResponse(skillCache[skill]);
-                setLoading(false);
-                return; 
-            }
-
-            let attempts = 0;
-            const maxAttempts = 5;
-            const retryDelay = 2000; 
-
-            while (attempts < maxAttempts) {
-                try {
-                    const chatGptResponse = await axios.post(
-                        process.env.REACT_APP_API_URL,
-                        {
-                            model: "gpt-3.5-turbo",
-                            messages: [
-                                {
-                                    role: "user",
-                                    content: `What is the improvement level for someone wanting to improve their ${skill}?`,
-                                },
-                            ],
-                        },
-                        {
-                            headers: {
-                                Authorization: `Bearer ${process.env.REACT_APP_API_KEY}`,
-                                "Content-Type": "application/json",
+            try {
+                console.log('Fetching response for skill:', skill);
+                const chatGptResponse = await axios.post(
+                    'https://api.openai.com/v1/chat/completions',
+                    {
+                        model: "gpt-3.5-turbo",
+                        messages: [
+                            {
+                                role: "user",
+                                content: `What are specific improvement suggestions for ${skill} in basketball? Please provide detailed, actionable tips.`,
                             },
-                        }
-                    );
-
-                    
-                    const result = chatGptResponse.data.choices[0].message.content;
-                    skillCache[skill] = result; 
-
-                    
-                    const splitResult = result.split('\n'); 
-                    setResponse(splitResult[0] || 'No general advice available.'); // General advice
-                    setBeginnerInfo(splitResult[1] || 'No beginner tips available.'); // Beginner tips
-                    setIntermediateInfo(splitResult[2] || 'No intermediate tips available.'); // Intermediate tips
-
-                    setLoading(false); 
-                    return; 
-                } catch (error) {
-                    if (error.response && error.response.status === 429) {
-                        const waitTime = retryDelay * 2 ** attempts; 
-                        console.warn(`Rate limit exceeded. Retrying in ${waitTime}ms...`);
-                        await new Promise((resolve) => setTimeout(resolve, waitTime)); // Wait before retrying
-                        attempts++; 
-                    } else {
-                        console.error("Error fetching response:", error);
-                        setResponse("Error fetching response from the API."); 
-                        setLoading(false); 
-                        return; 
+                        ],
+                    },
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${process.env.REACT_APP_API_KEY}`,
+                            'Content-Type': 'application/json',
+                        },
                     }
-                }
-            }
+                );
 
-            // If maximum attempts are exceeded
-            setResponse("Exceeded maximum retries. Please try again later.");
-            setLoading(false); 
+                if (chatGptResponse.data && chatGptResponse.data.choices && chatGptResponse.data.choices[0]) {
+                    const result = chatGptResponse.data.choices[0].message.content;
+                    setResponse(result);
+                    setError(null);
+                } else {
+                    throw new Error('Invalid response format from OpenAI');
+                }
+            } catch (error) {
+                console.error('Error details:', error);
+                if (error.response) {
+                    // The request was made and the server responded with a status code
+                    // that falls out of the range of 2xx
+                    console.error('API Error Response:', error.response.data);
+                    setError(`API Error: ${error.response.data.error?.message || 'Unknown error'}`);
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    console.error('No response received:', error.request);
+                    setError('No response received from the server. Please try again.');
+                } else {
+                    // Something happened in setting up the request that triggered an Error
+                    console.error('Error setting up request:', error.message);
+                    setError('Error setting up the request. Please try again.');
+                }
+            } finally {
+                setLoading(false);
+            }
         };
 
-        fetchResponse(); 
+        fetchResponse();
     }, [skill]);
 
     return (
-        <div>
+        <div className="response-page">
             <h1>Improvement Suggestions for {skill}</h1>
             {loading ? (
-                <p>Loading...</p> // Show loading message
+                <div className="loading-text">Loading your personalized suggestions...</div>
+            ) : error ? (
+                <div className="error-message">
+                    <p>{error}</p>
+                    <button onClick={() => navigate('/home')} className="back-button">
+                        Try Again
+                    </button>
+                </div>
             ) : (
                 <>
-                    <p>{response || 'No response available.'}</p>
-                    <h2>Beginner Tips</h2>
-                    <p>{beginnerInfo}</p>
-                    <h2>Intermediate Tips</h2>
-                    <p>{intermediateInfo}</p>
+                    <div className="suggestions">
+                        <p>{response || 'No suggestions available.'}</p>
+                    </div>
+                    <button onClick={() => navigate('/home')} className="back-button">
+                        Back to Home
+                    </button>
                 </>
             )}
-            <button onClick={() => navigate('/')}>Back to Home</button>
         </div>
     );
 }
