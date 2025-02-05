@@ -1,7 +1,7 @@
 body {
-    background-color: #1C1C1C; /* Carbon black background */
-    font-family: 'Oswald', sans-serif; /* Use the Oswald font */
-    color: #ffffff; /* White text for contrast */
+    background-color: #1C1C1C; 
+    font-family: 'Oswald', sans-serif; 
+    color: #ffffff; 
     margin: 0;
     padding: 0;
 }
@@ -10,24 +10,24 @@ body {
     padding: 20px;
     max-width: 800px;
     margin: auto;
-    background-color: rgba(0, 0, 0, 0.8); /* Slightly transparent background for the content */
+    background-color: rgba(0, 0, 0, 0.8); 
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 .title {
     text-align: center;
-    font-size: 2.5em; /* Larger font size for the title */
+    font-size: 2.5em; 
 }
 
 h2 {
     margin-top: 20px;
-    font-size: 1.8em; /* Slightly larger font size for subheadings */
+    font-size: 1.8em; 
 }
 
 button {
-    background-color: #4CAF50; /* Green background for the button */
-    color: white; /* White text */
+    background-color: #4CAF50; 
+    color: white; 
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
@@ -36,5 +36,5 @@ button {
 }
 
 button:hover {
-    background-color: #45a049; /* Darker green on hover */
+    background-color: #45a049; 
 }

@@ -1,4 +1,4 @@
-# Project Title
+# capstone
 
 ## Overview
 This project is designed to interact with the OPEN API, which provides a brief training tip for the user. The data returned from the API is formatted in [JSON/XML], and this README outlines the schema design for the relational database that will store the relevant data.

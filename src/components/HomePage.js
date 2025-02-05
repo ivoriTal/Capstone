@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
+import Auth from './Auth';
 
 function HomePage() {
     const [skill, setSkill] = useState('');
     const navigate = useNavigate();
+    const [token, setToken] = useState(null);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        navigate('/response', { state: { skill } }); // Pass the skill to the next page
+        navigate('/response', { state: { skill } }); 
     };
 
     return (
@@ -36,9 +38,14 @@ function HomePage() {
                     "Success is no accident. It is hard work, perseverance, learning, studying, sacrifice, and most of all, love of what you are doing or learning to do." - Pelé
                 </blockquote>
                 <blockquote>
-                    "You miss 100% of the shots you don’t take." - Wayne Gretzky
+                    "You miss 100% of the shots you don't take." - Wayne Gretzky
                 </blockquote>
             </div>
+            {!token ? (
+                <Auth setToken={setToken} />
+            ) : (
+                <p>You are logged in!</p>
+            )}
         </div>
     );
 }

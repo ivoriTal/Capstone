@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './ResponsePage.css'; // Import your CSS file
+import './ResponsePage.css'; 
 
 function ResponsePage() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { skill } = location.state || {}; // Handle case where state might be undefined
+    const { skill } = location.state || {}; 
     const [response, setResponse] = useState('');
     const [beginnerInfo, setBeginnerInfo] = useState('');
     const [intermediateInfo, setIntermediateInfo] = useState('');
-    const [loading, setLoading] = useState(true); // Loading state
+    const [loading, setLoading] = useState(true); 
 
-    const skillCache = {}; // Cache to store responses based on skill
+    const skillCache = {}; 
 
     useEffect(() => {
         if (!skill) {
@@ -22,17 +22,17 @@ function ResponsePage() {
         }
 
         const fetchResponse = async () => {
-            // Check if the response for the skill is already cached
+            
             if (skillCache[skill]) {
                 console.log('Returning cached response for skill:', skill);
                 setResponse(skillCache[skill]);
                 setLoading(false);
-                return; // Exit if the response is cached
+                return; 
             }
 
             let attempts = 0;
             const maxAttempts = 5;
-            const retryDelay = 2000; // Initial retry delay
+            const retryDelay = 2000; 
 
             while (attempts < maxAttempts) {
                 try {
@@ -55,39 +55,39 @@ function ResponsePage() {
                         }
                     );
 
-                    // Extract the response content
+                    
                     const result = chatGptResponse.data.choices[0].message.content;
-                    skillCache[skill] = result; // Cache the response
+                    skillCache[skill] = result; 
 
-                    // Split the response into different levels of advice
-                    const splitResult = result.split('\n'); // Adjust based on actual response format
+                    
+                    const splitResult = result.split('\n'); 
                     setResponse(splitResult[0] || 'No general advice available.'); // General advice
                     setBeginnerInfo(splitResult[1] || 'No beginner tips available.'); // Beginner tips
                     setIntermediateInfo(splitResult[2] || 'No intermediate tips available.'); // Intermediate tips
 
-                    setLoading(false); // Stop loading
-                    return; // Exit if successful
+                    setLoading(false); 
+                    return; 
                 } catch (error) {
                     if (error.response && error.response.status === 429) {
-                        const waitTime = retryDelay * 2 ** attempts; // Exponential backoff
+                        const waitTime = retryDelay * 2 ** attempts; 
                         console.warn(`Rate limit exceeded. Retrying in ${waitTime}ms...`);
                         await new Promise((resolve) => setTimeout(resolve, waitTime)); // Wait before retrying
-                        attempts++; // Increment the attempt count
+                        attempts++; 
                     } else {
                         console.error("Error fetching response:", error);
-                        setResponse("Error fetching response from the API."); // Set error message
-                        setLoading(false); // Stop loading even if there's an error
-                        return; // Exit on other errors
+                        setResponse("Error fetching response from the API."); 
+                        setLoading(false); 
+                        return; 
                     }
                 }
             }
 
             // If maximum attempts are exceeded
             setResponse("Exceeded maximum retries. Please try again later.");
-            setLoading(false); // Stop loading after retries
+            setLoading(false); 
         };
 
-        fetchResponse(); // Call the fetch function
+        fetchResponse(); 
     }, [skill]);
 
     return (
